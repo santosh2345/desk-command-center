@@ -8,16 +8,20 @@ import {
   Inbox, 
   CheckSquare, 
   Settings,
-  Folder
+  Folder,
+  X
 } from 'lucide-react';
 import { useLocation, Link } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarProps {
   isOpen: boolean;
+  toggleSidebar: () => void;
 }
 
-const Sidebar = ({ isOpen }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar }: SidebarProps) => {
   const location = useLocation();
+  const isMobile = useIsMobile();
   
   const navItems = [
     { icon: Home, label: 'Dashboard', path: '/' },
@@ -33,9 +37,27 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
     <aside 
       className={cn(
         "fixed left-0 top-0 z-30 h-screen bg-slate-800 text-white transition-all duration-300 pt-16",
-        isOpen ? "w-60" : "w-20"
+        isOpen 
+          ? isMobile 
+            ? "w-60 translate-x-0" 
+            : "w-60" 
+          : isMobile 
+            ? "-translate-x-full" 
+            : "w-20",
       )}
     >
+      {/* Mobile close button */}
+      {isMobile && isOpen && (
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          className="absolute right-2 top-2 text-white hover:bg-slate-700"
+          onClick={toggleSidebar}
+        >
+          <X className="h-5 w-5" />
+        </Button>
+      )}
+      
       <nav className="flex flex-col p-3 h-full">
         {navItems.map((item) => (
           <Link 
@@ -47,9 +69,10 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
                 ? "bg-slate-700 text-white" 
                 : "text-slate-300 hover:bg-slate-700 hover:text-white"
             )}
+            onClick={isMobile ? toggleSidebar : undefined}
           >
             <item.icon className="h-5 w-5 shrink-0" />
-            {isOpen && <span className="ml-3">{item.label}</span>}
+            {(isOpen || isMobile) && <span className="ml-3">{item.label}</span>}
           </Link>
         ))}
       </nav>
